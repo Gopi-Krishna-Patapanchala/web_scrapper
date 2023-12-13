@@ -245,7 +245,7 @@ fn venue_scapper(html: &str, file_path: &str,file_name:&str){
 
 
 fn main() {
-    let config_file_path ="/Users/gopikrishna/Documents/rust_workspace/final_project/src/match_url_config.txt";
+    let config_file_path ="match_url_config.txt";
 
     //clean_up::clean_folders();
     
