@@ -44,6 +44,6 @@ pub fn update_latest_info() {
     let _ = conn.execute("COPY ( SELECT STAGING_DATA.ID
     FROM STAGING_DATA
     LEFT JOIN MASTER_DATA ON STAGING_DATA.ID = MASTER_DATA.ID
-    WHERE MASTER_DATA.ID IS NULL) TO '/Users/gopikrishna/Documents/rust_workspace/final_project/intrim/latest.csv' (DELIMITER ',');",params![]).expect("msg");
+    WHERE MASTER_DATA.ID IS NULL) TO './intrim/latest.csv' (DELIMITER ',');",params![]).expect("msg");
             
     }
