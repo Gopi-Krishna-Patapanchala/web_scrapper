@@ -235,7 +235,7 @@ fn venue_scapper(html: &str, file_path: &str,file_name:&str){
 
 
 fn main() {
-    let config_file_path ="match_url_config.txt";
+    let config_file_path ="src/match_url_config.txt";
 
     clean_up::clean_folders();
     
@@ -352,7 +352,7 @@ fn main() {
     }
     println!("stagging File Generated successfully");
     write_player_info(&interim_player_info, &interim_folder);
-
+    
     let _ =connect_duck_db::update_latest_info();
     println!("Filtering the Latest information based on master data");
     fetch_latest_info::update_master();
