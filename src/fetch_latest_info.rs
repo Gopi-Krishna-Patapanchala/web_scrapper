@@ -80,7 +80,7 @@ pub fn update_master() {
         match result {
             Ok(record) => {
                 if !record.is_empty() {
-                    println!("{:?}",record);
+                   // println!("{:?}",record);
                     let player_id = record.get(0).unwrap_or("default_value");
 
                     let url = format!(
