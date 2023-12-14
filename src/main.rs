@@ -28,28 +28,24 @@ fn batting_scorecard(html: &str, file_path: &str) {
     let mut table_count = 1;
 
     for table in document.select(&table_selector) {
-        // Define a selector for table rows
+
         let row_selector = Selector::parse("tr").unwrap();
 
-        // Create a CSV file for writing the scorecard
+   
         let csv_filename = format!("{}/batting_scorecard{}.csv", csv_file_directory, table_count);
 
-        //println!("{:?}", csv_filename);
         let mut writer = Writer::from_path(csv_filename.clone()).expect("Failed to create the CSV file");
 
-        // Write the CSV header with the new 'caption_flag' column
         writer.write_record(&["Player", "Dismissal", "R", "B", "M", "4s", "6s", "SR"])
             .expect("Failed to write the header");
 
-        // Extract player information and write to the CSV
         for row in table.select(&row_selector) {
-            // Create a selector for table columns within each row
+
             let column_selector = Selector::parse("td").expect("Failed to create column selector");
             let columns = row.select(&column_selector);
 
             let data: Vec<String> = columns.map(|column| column.text().collect()).collect();
 
-            // Ensure that the row contains data
             if data.len() == 8 {
                 let player_name = &data[0];
                 let dismissal = &data[1];
@@ -66,10 +62,10 @@ fn batting_scorecard(html: &str, file_path: &str) {
 }
 
 fn bowling_scraper(html: &str, file_path: &str) {
-    // Parse the HTML document using the scraper crate
+
     let document = Html::parse_document(html);
 
-    // Define a CSS selector for all tables
+    
     let table_selector = Selector::parse("table.ds-table.ds-table-md.ds-table-auto").expect("Failed to find the table");
 
     let csv_file_directory = format!("{}/scorecard", file_path);
@@ -82,41 +78,37 @@ fn bowling_scraper(html: &str, file_path: &str) {
     let mut table_count = 1;
 
     for table in document.select(&table_selector) {
-        // Define a selector for table rows within the table
+
         let row_selector = Selector::parse("tbody tr").expect("Failed to create row selector");
 
-        // Create a CSV file for writing the bowling scorecard
         let csv_filename = format!("{}/bowling_scorecard{}.csv", csv_file_directory, table_count);
 
         let mut writer = Writer::from_path(csv_filename.clone()).expect("Failed to create the CSV file");
 
-        // Write the CSV header
+
         writer.write_record(&[
             "Bowler_name", "O", "M", "R", "W", "ECON", "0s", "4s", "6s", "WD", "NB",
         ])
         .expect("Failed to write the header");
 
-        // Extract bowler information and write to the CSV
-        let mut has_records = false; // Track if there are records in the CSV
+        let mut has_records = false; 
 
         for row in table.select(&row_selector) {
-            // Create a selector for table columns within each row
             let column_selector = Selector::parse("td").expect("Failed to create column selector");
             let columns = row.select(&column_selector);
 
             let data: Vec<String> = columns.map(|column| column.text().collect()).collect();
 
-            // Ensure that the row contains data
             if data.len() == 11 {
                 writer.write_record(&data).expect("Failed to write content");
-                has_records = true; // Records found in this CSV
+                has_records = true; 
             }
         }
 
         writer.flush().expect("Failed to flush");
         table_count += 1;
 
-        // Remove the CSV file if it doesn't have records
+
         if !has_records {
             fs::remove_file(csv_filename).expect("Failed to remove empty CSV file");
         }
@@ -124,19 +116,17 @@ fn bowling_scraper(html: &str, file_path: &str) {
 }
 
 fn venue_name(html: &str) -> String {
-    // Parse the HTML content
+
     let fragment = Html::parse_fragment(html);
 
-    // Define a variable to store the stadium name
     let mut stadium = "".to_string();
 
-    // Iterate through the <a> elements in the HTML
     for a in fragment.select(&Selector::parse("a").unwrap()) {
         if let Some(href) = a.value().attr("href") {
             if href.contains("/cricket-grounds/") {
-                // If the <a> element's href contains "/cricket-grounds/", extract the stadium name
+
                 stadium = href.to_string();
-                break; // Exit the loop since we found the stadium name
+                break; 
             }
         }
     }
@@ -160,17 +150,17 @@ fn write_player_info(player_info: &HashSet<String>, file_path: &str) {
     }
 
     let mut writer = WriterBuilder::new()
-        .has_headers(!headers_written)  // Write headers only if they haven't been written
+        .has_headers(!headers_written) 
         .from_path(&csv_file_path)
         .unwrap();
 
-    // Write headers to the CSV file if it's empty
+    
     if !headers_written {
         writer.write_record(&["player_id"]).unwrap();
     }
 
     for info in player_info {
-        let info_parts: &str = info; // Convert the String to &str if needed
+        let info_parts: &str = info; 
         writer.write_record(&[info_parts]).unwrap();
     }
 
@@ -218,14 +208,14 @@ fn venue_scapper(html: &str, file_path: &str,file_name:&str){
                 "match days" => match_days = value,
                 "points" => points = value,
                 "series result" => points = value,
-                _ => {} // Handle other keys or ignore them
+                _ => {}
             }
         }
     }
 
     let csv_file_path = format!("{}/{}.csv", file_path,file_name);
     let mut writer = WriterBuilder::new()
-        .has_headers(false)  // Do not write headers since there's only one row
+        .has_headers(false)  
         .from_path(csv_file_path.clone())
         .expect("Failed to create or open CSV file");
 
@@ -240,14 +230,14 @@ fn venue_scapper(html: &str, file_path: &str,file_name:&str){
 
     writer.flush().expect("Failed to flush");
 
-   // println!("Venue information has been written to CSV: {}", csv_file_path);
+   println!("Venue information has been written to CSV: {}", csv_file_path);
 }
 
 
 fn main() {
     let config_file_path ="match_url_config.txt";
 
-    //clean_up::clean_folders();
+    clean_up::clean_folders();
     
     let urls = match fs::read_to_string(config_file_path) {
         Ok(contents) => contents
@@ -260,7 +250,7 @@ fn main() {
         }
     };
 
-    // Create a reqwest client with a timeout of 10 seconds
+   
     let client = Client::builder().timeout(Duration::from_secs(10)).build().unwrap();
     let csv_file_path = "./Match_details";
 
@@ -269,7 +259,6 @@ fn main() {
         return;
     }
 
-    // Create a HashSet to keep track of already processed players
     
     let mut interim_player_info: HashSet<String> = HashSet::new();
     
@@ -289,12 +278,11 @@ fn main() {
                     let csv_file_directory = format!("{}/{}", csv_file_path, &parts[parts.len() - 2]);
                     let csv_file_path_temp = format!("{}/players.csv", csv_file_directory);
 
-                    // Create the directory if it doesn't exist
                     if !Path::new(&csv_file_directory).exists() {
                         fs::create_dir_all(&csv_file_directory).unwrap();
                     }
 
-                    // Check if headers have been written
+
                     let headers_written = Path::new(&csv_file_path_temp).exists();
 
                     if let Err(e) = OpenOptions::new()
@@ -306,41 +294,29 @@ fn main() {
                         continue;
                     }
 
-                    // Use WriterBuilder to set headers for the CSV file
                     let mut writer = WriterBuilder::new()
-                        .has_headers(!headers_written)  // Write headers only if they haven't been written
+                        .has_headers(!headers_written) 
                         .from_path(&csv_file_path_temp)
                         .unwrap();
 
-                    // Write headers to the CSV file if it's empty
                     if !headers_written {
                         writer.write_record(&["player name", "player_id", "captain_flag"]).unwrap();
                     }
 
-                    // Iterate over <a> tags with the specified class
                     for node in document.find(Name("a")) {
                         if let Some(href) = node.attr("href") {
-                            // Check if the URL contains "/cricketers/"
                             if href.contains("/cricketers/") {
-                                // Extract cricketer's name and ID using the regex
                                 if let Some(captures) = re.captures(href) {
                                     if let Some(name) = captures.get(1).map(|m| m.as_str()) {
                                         if let Some(id) = captures.get(2).map(|m| m.as_str()) {
-                                            // Replace hyphens with an empty string
                                             let stripped_name = name.replace('-', " ");
-                                            
-                                            // Check if this player is already processed
                                             if processed_players.contains(id) {
                                                 continue;
                                             }
 
                                             // Check if the player is the captain
                                             let is_captain = node.text().contains("(c)");
-
-                                            // Write to CSV
                                             writer.write_record(&[stripped_name, id.to_string(), is_captain.to_string()]).unwrap();
-
-                                            // Add the player ID to the processed set
                                             processed_players.insert(id.to_string());
                                             interim_player_info.insert(id.to_string());
                                         }
@@ -375,11 +351,10 @@ fn main() {
         return;
     }
     println!("stagging File Generated successfully");
-    // Call the function to write player information to a CSV file
     write_player_info(&interim_player_info, &interim_folder);
 
     let _ =connect_duck_db::update_latest_info();
-    // println!("Filtering the Latest information based on master data");
+    println!("Filtering the Latest information based on master data");
     fetch_latest_info::update_master();
 
 }
