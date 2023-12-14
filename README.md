@@ -12,6 +12,18 @@ The web scraper was created entirely using the RUST programming language. This t
 
 clone the project 
 ```
-git clone 
-
+git clone https://github.com/Gopi-Krishna-Patapanchala/web_scrapper.git
 ```
+Navigate into the clone project directory
+```
+cd web_scrapper
+```
+Now build the Cargo project using the below command
+```
+cargo build
+```
+Now everything was set to go. you need to place the scorecard URL's in the config file and execute the project using the below command
+```
+cargo run
+```
+you will see the Match_details folder with match wise subfolders in it and Master_data folder with all players information.
